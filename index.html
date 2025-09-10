@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastgele Görseller</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Ekran dışına taşmayı önlemek için */
+            position: relative;
+            background: #000; /* Opsiyonel: Arka plan rengi */
+        }
+        img {
+            max-width: 300px; /* Görsellerin boyutunu küçülttüm, değiştirebilirsin */
+            max-height: 300px;
+            position: absolute;
+        }
+        .sorry-image {
+            max-width: 600px; /* sorry.jpeg için farklı boyut, isteğe bağlı */
+            max-height: 600px;
+            z-index: 10000; /* sorry.jpeg diğer görsellerin üstünde olsun */
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Yerel images klasöründeki görsellerin dosya yollarını buraya ekle
+        const imageUrls = [
+            'images/1.jpeg',
+            'images/2.jpeg',
+            'images/3.jpeg',
+            'images/4.jpeg',
+            'images/5.jpeg',
+            'images/6.jpeg',
+            'images/7.jpeg',
+            'images/8.jpeg',
+            'images/9.jpeg', // Görsel isimlerini kendi dosyalarına göre değiştir
+            'images/10.jpeg',
+            'images/11.jpeg',
+            'images/12.jpeg',
+            'images/13.jpeg',
+            'images/14.jpeg',
+            'images/15.jpeg',
+            'images/16.jpeg',
+            'images/17.jpeg',
+            'images/18.jpeg',
+            'images/19.jpeg',
+            'images/20.jpeg',
+            'images/21.jpeg',
+            'images/22.jpeg',
+            'images/23.jpeg',
+            'images/24.jpeg',
+            'images/25.jpeg',
+            'images/26.jpeg'
+
+            
+            // Eklemek istediğin diğer görselleri buraya ekle
+        ];
+
+        // Zaman aralığı: Her 3 saniyede bir yeni görsel ekle (değiştirebilirsin)
+        const intervalTime = 200;
+        // 10 saniye sonra durdur ve sorry.jpeg göster
+        const stopTime = 10000;
+
+        // Ekranı ızgara bölgelerine bölerek daha eşit dağılım sağla
+        function getRandomPosition(imgWidth, imgHeight) {
+            const maxTop = window.innerHeight - imgHeight;
+            const maxLeft = window.innerWidth - imgWidth;
+
+            // Ekranı 4 bölgeye böl (2x2 ızgara)
+            const gridSize = 2; // 2x2 ızgara
+            const gridWidth = window.innerWidth / gridSize;
+            const gridHeight = window.innerHeight / gridSize;
+
+            // Rastgele bir bölge seç
+            const gridX = Math.floor(Math.random() * gridSize);
+            const gridY = Math.floor(Math.random() * gridSize);
+
+            // Seçilen bölgede rastgele bir pozisyon hesapla
+            let left = gridX * gridWidth + Math.random() * (gridWidth - imgWidth);
+            let top = gridY * gridHeight + Math.random() * (gridHeight - imgHeight);
+
+            // Pozisyonların ekran dışına çıkmamasını sağla
+            left = Math.max(0, Math.min(left, maxLeft));
+            top = Math.max(0, Math.min(top, maxTop));
+
+            return { top, left };
+        }
+
+        function addRandomImage() {
+            // Rastgele bir görsel seç
+            const randomIndex = Math.floor(Math.random() * imageUrls.length);
+            const src = imageUrls[randomIndex];
+
+            // Yeni bir img elementi oluştur
+            const img = new Image();
+            img.src = src;
+
+            // Görsel yüklendikten sonra pozisyonunu ayarla ve ekle
+            img.onload = function() {
+                // Görselin boyutlarını al
+                const imgWidth = img.width > 150 ? 150 : img.width; // CSS max-width ile uyumlu
+                const imgHeight = img.height > 150 ? 150 : img.height; // CSS max-height ile uyumlu
+
+                // Rastgele pozisyon al
+                const { top, left } = getRandomPosition(imgWidth, imgHeight);
+
+                img.style.top = `${top}px`;
+                img.style.left = `${left}px`;
+
+                // Vücuda ekle (önceki görseller silinmez)
+                document.body.appendChild(img);
+            };
+
+            // Görsel yüklenemezse hata kontrolü
+            img.onerror = function() {
+                console.error(`Görsel yüklenemedi: ${src}`);
+            };
+        }
+
+        function showSorryImage() {
+            // sorry.jpeg görselini oluştur
+            const sorryImg = new Image();
+            sorryImg.src = 'images/sorry.jpeg';
+            sorryImg.className = 'sorry-image'; // Özel stil için sınıf ekle
+
+           sorryImg.onload = function() {
+                // Görselin boyutlarını CSS max-width/max-height ile sınırla
+                const imgWidth = sorryImg.width > 300 ? 300 : sorryImg.width;
+                const imgHeight = sorryImg.height > 300 ? 300 : sorryImg.height;
+
+                // Ekranın üst çeyreğine yerleştir (yaklaşık %25'lik bölge)
+                const top = (window.innerHeight * 0.25 - imgHeight) / 2; // Üst çeyreğin ortası
+                const left = (window.innerWidth - imgWidth) / 2; // Yatayda tam ortada
+
+                sorryImg.style.top = `${Math.max(0, top)}px`; // Negatif değerleri önlemek için
+                sorryImg.style.left = `${left}px`;
+
+                // Vücuda ekle
+                document.body.appendChild(sorryImg);
+            };
+            
+
+            sorryImg.onerror = function() {
+                console.error('sorry.jpeg yüklenemedi');
+            };
+        }
+
+        // Sayfa yüklendiğinde başla
+        window.onload = function() {
+            // Rastgele görselleri eklemeye başla
+            const interval = setInterval(addRandomImage, intervalTime);
+
+            // 10 saniye sonra durdur ve sorry.jpeg göster
+            setTimeout(() => {
+                clearInterval(interval); // Rastgele görsel eklemeyi durdur
+                showSorryImage(); // sorry.jpeg göster
+            }, stopTime);
+        };
+    </script>
+</body>
+</html>
